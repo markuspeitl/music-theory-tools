@@ -10,8 +10,15 @@
   "scripts": {
     "start": "ts-node --esm src/scales-gen.ts",
     "build": "tsc",
-    "install-local": "npm link",
-    "try-linked": "npm run build && music-theory-kit scale A minor",
+    "start:dist": "tsc && node dist/music-theory-tool.js",
+    "examples": "npm-run-all example:*",
+    "example:scale": "npx ts-node --esm src/music-theory-tool.ts scale A minor",
+    "example:transpose": "npx ts-node --esm src/music-theory-tool.ts transpose A E Am^F 'G' F C",
+    "example:map-scale": "npx ts-node --esm src/music-theory-tool.ts map_guitar A minor",
+    "example:map-chord": "npx ts-node --esm src/music-theory-tool.ts map_guitar Bm",
+    "example:find-relative-scales": "npx ts-node --esm src/music-theory-tool.ts relative_scales B minor",
+    "install-local": "tsc && npm link",
+    "example-installed-global": "npm run build && music-theory-kit scale A minor",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -20,11 +27,12 @@
     "@types/d3": "^7.4.0",
     "@types/jsdom": "^20.0.1",
     "@types/typescript": "^2.0.0",
+    "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.4",
+    "@types/argparse": "^2.0.10"
   },
   "dependencies": {
-    "@types/argparse": "^2.0.10",
     "argparse": "^2.0.1",
     "d3": "^7.8.0",
     "jsdom": "^21.0.0"
