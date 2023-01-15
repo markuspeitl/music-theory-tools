@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/music-theory-tool.js",
+  "bin": {
+    "music-theory-kit": "dist/music-theory-tool.js"
+  },
   "type": "module",
   "scripts": {
     "start": "ts-node --esm src/scales-gen.ts",
     "build": "tsc",
+    "install-local": "npm link",
+    "try-linked": "npm run build && music-theory-kit scale A minor",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

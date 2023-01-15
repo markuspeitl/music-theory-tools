@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import argparse, { ArgumentParser } from 'argparse';
 export * from './scales-gen.js';
 import { getRelativeScales, getScaleFromKey, mapPrintGuitarChord, mapPrintGuitarScale, transposeChordProgression } from './scales-gen.js';
@@ -72,7 +74,7 @@ export function parsePassedArgs(): Record<string, any> {
 
 	//parser.add_argument('-log', '--log_out_file', { action: 'store_true', help: 'Print the installer file' });
 	const args: Record<string, any> = parser.parse_args();
-	console.log(args);
+	//console.log(args);
 	args.handlerFunction(args);
 
 	return args;
@@ -85,7 +87,7 @@ function run(): void {
 function isDirectCalled(): boolean {
 	//console.log(import.meta.url);
 	//console.log(process.argv);
-	return import.meta.url.replace('file://', '') === process.argv[1];
+	return import.meta.url.replace('file://', '') === process.argv[1] || process.argv[1].includes('/bin/');
 }
 if (isDirectCalled()) {
 	run();
