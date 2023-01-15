@@ -72,3 +72,5 @@ export const chordFormulas: Record<string, number[]> = {
 	maj9: [],
 	min9: []
 };
+
+export const guitarStandardTuning: string[] = ['E', 'A', 'D', 'G', 'B', 'E'];

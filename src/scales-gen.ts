@@ -1,4 +1,4 @@
-import { baseScaleFormulas, chordFormulas, generateMajorScaleDegreeFormula, scaleModeShifts } from './formulas.js';
+import { baseScaleFormulas, chordFormulas, generateMajorScaleDegreeFormula, guitarStandardTuning, scaleModeShifts } from './formulas.js';
 import { circularShift, getModuloIndex, getSymbolFromIndex } from './util.js';
 
 //Symbols
@@ -205,31 +205,41 @@ export function mapScaleOnRange(rangeStartKey: string, rangeLength: number, scal
 	return mapNotesOnRange(rangeStartKey, rangeLength, scaleNotes);
 }
 
-export function mapScaleOnStrings(baseTuning: string[], scaleRootKey: string, scaleTypeId: string, rangeLength: number = 12): boolean[][] {
-	return baseTuning.map((stringRootNote: string) => mapScaleOnRange(stringRootNote, rangeLength, scaleRootKey, scaleTypeId));
-}
 export function mapNotesOnStrings(baseTuning: string[], notes: string[], rangeLength: number = 12): boolean[][] {
 	return baseTuning.map((stringRootNote: string) => mapNotesOnRange(stringRootNote, rangeLength, notes));
 }
+export function mapScaleOnStrings(baseTuning: string[], scaleRootKey: string, scaleTypeId: string, rangeLength: number = 12): boolean[][] {
+	const scaleNotes: string[] = getScaleFromKey(scaleRootKey, scaleTypeId);
+	const stringsScaleMapping: boolean[][] = mapNotesOnStrings(baseTuning, scaleNotes, rangeLength);
+	return stringsScaleMapping;
+}
+export function mapChordOnStrings(baseTuning: string[], chordNotation: string, rangeLength: number = 12): boolean[][] {
+	const chordNotes: string[] = getChordFromNotation(chordNotation);
+	const stringsScaleMapping: boolean[][] = mapNotesOnStrings(baseTuning, chordNotes, rangeLength);
+	return stringsScaleMapping;
+}
 
-const guitarStandardTuning: string[] = ['E', 'A', 'D', 'G', 'B', 'E'];
 export function mapPrintGuitarScale(scaleRootKey: string, scaleTypeId: string, rangeLength: number = 14, tuning: string[] = guitarStandardTuning): void {
 	console.log(`Guitar Map: ${scaleRootKey}${scaleTypeId} - Range: ${rangeLength} - Tuning: ${JSON.stringify(tuning)}`);
-
 	const stringsScaleMapping: boolean[][] = mapScaleOnStrings(tuning, scaleRootKey, scaleTypeId, rangeLength);
 	printStrings(stringsScaleMapping);
 	printStringsHorizontal(stringsScaleMapping);
 }
 export function mapPrintGuitarChord(chordNotation: string, rangeLength: number = 14, tuning: string[] = guitarStandardTuning): void {
 	console.log(`Guitar Map: ${chordNotation} - Range: ${rangeLength} - Tuning: ${JSON.stringify(tuning)}`);
-	const chordNotes: string[] = getChordFromNotation(chordNotation);
-	console.log(JSON.stringify(chordNotes));
-	const stringsScaleMapping: boolean[][] = mapNotesOnStrings(tuning, chordNotes, rangeLength);
+	const stringsScaleMapping: boolean[][] = mapChordOnStrings(tuning, chordNotation, rangeLength);
 	printStrings(stringsScaleMapping);
 	printStringsHorizontal(stringsScaleMapping);
 }
 
-function printStrings(noteSets: boolean[][]): void {
+export function mapChordOrScaleOnStrings(keySignature: string, scaleTypeId?: string, rangeLength: number = 14, tuning: string[] = guitarStandardTuning): boolean[][] {
+	if (!scaleTypeId) {
+		return mapChordOnStrings(tuning, keySignature, rangeLength);
+	}
+	return mapScaleOnStrings(tuning, keySignature, scaleTypeId, rangeLength);
+}
+
+export function printStrings(noteSets: boolean[][]): void {
 	console.log('Strings map: ');
 
 	const stringLength: number = noteSets[0].length;
@@ -247,7 +257,7 @@ function printStrings(noteSets: boolean[][]): void {
 	console.log();
 }
 
-function printStringsHorizontal(noteSets: boolean[][], mirror?: boolean): void {
+export function printStringsHorizontal(noteSets: boolean[][], mirror?: boolean): void {
 	console.log('Strings map horizontal: ');
 	const stringLength: number = noteSets[0].length;
 	let selectedNoteSet: boolean[][] = noteSets.reverse();
@@ -334,7 +344,7 @@ function extractChordTypeFromChordDef(chordNotation: string): string {
 
 	return chordNotation.slice(1);
 }
-function getChordFromNotation(chordNotation: string) {
+export function getChordFromNotation(chordNotation: string) {
 	return getChord(extractKeyFromChordDef(chordNotation), extractChordTypeFromChordDef(chordNotation));
 }
 

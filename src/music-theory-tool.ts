@@ -2,7 +2,21 @@
 
 import argparse, { ArgumentParser } from 'argparse';
 export * from './scales-gen.js';
-import { getRelativeScales, getScaleFromKey, mapPrintGuitarChord, mapPrintGuitarScale, transposeChordProgression } from './scales-gen.js';
+import {
+	getRelativeScales,
+	getScaleFromKey,
+	mapChordOrScaleOnStrings,
+	mapPrintGuitarChord,
+	mapPrintGuitarScale,
+	printStrings,
+	printStringsHorizontal,
+	transposeChordProgression
+} from './scales-gen.js';
+import { stringsMapToSvg, writeSvgToFile } from './gen-music-graphics.js';
+import path from 'path';
+
+const scriptDir: string = path.dirname(import.meta.url.replace('file://', ''));
+const generatedGraphicsDirectory: string = path.join(scriptDir, '/..', 'generated-graphics');
 
 //npx ts-node --esm src/music-theory-tool.ts scale A minor
 function scaleGen(args: Record<string, any>): void {
@@ -21,16 +35,29 @@ function transposeProgression(args: Record<string, any>): void {
 	console.log(transposeChordProgression(args.progression, args.src_key, args.target_key));
 }
 
+import open from 'open';
 //npx ts-node --esm src/music-theory-tool.ts map_guitar Am
 //npx ts-node --esm src/music-theory-tool.ts map_guitar A major
 function mapPrintGuitar(args: Record<string, any>): void {
 	console.log('mapPrintGuitar');
 	//mapPrintGuitarChord('Bdim');
 	//mapPrintGuitarScale('E', 'dorian');
-	if (args.scale_type) {
-		mapPrintGuitarScale(args.key_signature, args.scale_type);
+
+	const stringsMapping: boolean[][] = mapChordOrScaleOnStrings(args.key_signature, args.scale_type, args.map_range, args.tuning);
+	if (args.print_console) {
+		printStrings(stringsMapping);
+		printStringsHorizontal(stringsMapping);
 	} else {
-		mapPrintGuitarChord(args.key_signature);
+		const svgString: string = stringsMapToSvg(stringsMapping);
+		const scaleTypeString: string = args.scale_type ? args.scale_type : '';
+		const svgFileName: string = args.key_signature + scaleTypeString + '.svg';
+		let svgPath: string = path.join(generatedGraphicsDirectory, svgFileName);
+		if (args.file) {
+			svgPath = args.file;
+		}
+
+		writeSvgToFile(svgString, svgPath);
+		open(svgPath, { wait: true });
 	}
 }
 
@@ -66,13 +93,20 @@ export function parsePassedArgs(): Record<string, any> {
 
 	mapGuitarParser.add_argument('key_signature', { help: 'Target chord or scale key to map on guitar strings' });
 	mapGuitarParser.add_argument('scale_type', { help: 'Type of the scale based on key_signature root key to map on guitar', nargs: '?' });
+	mapGuitarParser.add_argument('-p', '--print_console', { action: 'store_true', help: 'Only print mapping output to console and do not create an .svg graphic of the map' });
+	mapGuitarParser.add_argument('-l', '--map_range', { help: 'Length of the chromatic scake range of keys to be mapped on', type: 'int' });
+	mapGuitarParser.add_argument('-t', '--tuning', {
+		help: 'Tuning of the instument, each string is tuned to the note/key it is starting on, example "E A D G B E" is standard guitar tuning',
+		nargs: '+'
+	});
+	mapGuitarParser.add_argument('-f', '--file', { help: 'File name of the output string mapping graphic' });
 	mapGuitarParser.set_defaults({ handlerFunction: mapPrintGuitar });
 
 	getRelativeScalesParser.add_argument('root_key', { help: 'Root key of the scale' });
 	getRelativeScalesParser.add_argument('scale_type', { help: 'Type of scale to find equivalent scales for' });
 	getRelativeScalesParser.set_defaults({ handlerFunction: getPrintRelativeScales });
 
-	//parser.add_argument('-log', '--log_out_file', { action: 'store_true', help: 'Print the installer file' });
+	//
 	const args: Record<string, any> = parser.parse_args();
 	//console.log(args);
 	args.handlerFunction(args);
