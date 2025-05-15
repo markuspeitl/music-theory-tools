@@ -9,6 +9,7 @@
   "type": "module",
   "scripts": {
     "start": "ts-node --esm src/music-theory-tool.ts",
+    "start:tsx": "tsx src/music-theory-tool.ts scale A minor",
     "build": "tsc",
     "start:dist": "tsc && node dist/music-theory-tool.js",
     "examples": "npm-run-all example:*",
